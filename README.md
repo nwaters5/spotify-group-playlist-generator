@@ -1,5 +1,5 @@
 # Spotify Group Playlist Generator
-App that recommends a playlist of songs for a group of people.
+App that recommends a playlist of songs for a group of people based on their spotify accounts, as well as live feedback
 
 ## Business Understanding
 
