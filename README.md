@@ -1,4 +1,4 @@
-# spotify-group-playlist-generator
+# Spotify Group Playlist Generator
 App that recommends a playlist of songs for a group of people.
 
 ## Business Understanding
