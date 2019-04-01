@@ -13,6 +13,7 @@ class ScrapeUserLibrary(object):
         token = spotipyxx.get_token(username)
         self.sp = spotipy.Spotify(auth=token)
         self.user = username
+    
     #return all saved tracks
     def get_library_df(self):
         #sp = spotipy.Spotify(auth=self.token)
@@ -34,6 +35,7 @@ class ScrapeUserLibrary(object):
                 track_uris.append(track['uri'])
             library_df = pd.concat([library_df, pd.DataFrame({'artist': artists, 'artist_uri': artist_uris, 'track': tracks, 'track_uri': track_uris})])
         library_df = library_df.reset_index()
+        library_df['track'] = library_df['track'].str.split(" - ", expand=True)[0]
         return library_df
 
     #return all tracks from all playlists
@@ -61,6 +63,11 @@ class ScrapeUserLibrary(object):
                     tracks = self.sp.next(tracks)
                     show_tracks(tracks)
         playlist_df = pd.DataFrame({'artist': p_artists, 'artist_uri': p_artist_uris, 'track': p_tracks, 'track_uri': p_track_uris})
+        playlist_df['track'] = playlist_df['track'].str.split(" - ", expand=True)[0]
+        repeats = playlist_df['track_uri'].value_counts()
+        playlist_df['repeats'] = playlist_df['track_uri'].apply(lambda x: repeats[x])
+        playlist_df.drop_duplicates(inplace=True)
+        playlist_df.reset_index(inplace=True)
         return playlist_df
     
     #return a track's audio features
@@ -88,22 +95,27 @@ class ScrapeUserLibrary(object):
                 artist_uris.append(item['uri'])
             i += 49
             results = self.sp.current_user_top_artists(limit=49, offset=i, time_range="long_term")
-        return pd.DataFrame({'artists': artists, 'artist_uris': artist_uris})
+        return pd.DataFrame({'artists': artists, 'artist_uri': artist_uris})
 
     #return top 98 tracks
     def get_top_tracks(self):
         #sp = spotipy.Spotify(auth=self.token)
         tracks = []
         track_uris = []
+        artists = []
+        artist_uris = []
         results = self.sp.current_user_top_tracks(limit=49, offset=0, time_range="long_term")
         i = 0
         while len(results['items']) > 0:
             for item in results['items']:
                 tracks.append(item['name'])
                 track_uris.append(item['uri'])
+                artists.append(item['artists'][0]['name'])
+                artist_uris.append(item['artists'][0]['uri'])
             i +=49
             results = self.sp.current_user_top_tracks(limit=49, offset=i, time_range="long_term")
-        return pd.DataFrame({'tracks': tracks, 'track_uri': track_uris})
-
+        top_artists_df = pd.DataFrame({'artist': artists, 'artist_uri': artist_uris, 'track': tracks, 'track_uri': track_uris})
+        top_artists_df['track'] = top_artists_df['track'].str.split(" - ", expand=True)[0]
+        return top_artists_df
 
 
