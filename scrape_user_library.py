@@ -9,10 +9,10 @@ import spotipyxx
 class ScrapeUserLibrary(object):
     
     #initialize tokens
-    def __init__(self):
-        token, user = spotipyxx.get_token()
+    def __init__(self, username):
+        token = spotipyxx.get_token(username)
         self.sp = spotipy.Spotify(auth=token)
-        self.user = user
+        self.user = username
     #return all saved tracks
     def get_library_df(self):
         #sp = spotipy.Spotify(auth=self.token)
@@ -62,19 +62,18 @@ class ScrapeUserLibrary(object):
                     show_tracks(tracks)
         playlist_df = pd.DataFrame({'artist': p_artists, 'artist_uri': p_artist_uris, 'track': p_tracks, 'track_uri': p_track_uris})
         return playlist_df
-
+    
+    #return a track's audio features
+    def get_audio_features(self, x, key):
+        return self.sp.audio_features(x)[0][key]
+    
     #return df with new features: dance, energy, valence
     def get_feature_columns(self, df, column_name='track_uri'):
         #sp = spotipy.Spotify(auth=self.token)
         features = ['danceability', 'energy', 'valence']
         for i in features:
-            df[i] = df[column_name].apply(lambda x: get_audio_features(x, i))
+            df[i] = df[column_name].apply(lambda x: self.get_audio_features(x, i))
         return df
-    
-    #return a track's audio features
-    def get_audio_features(self, x, key):
-        return self.sp.audio_features(x)[0][key]
-
     
     #return top 98 artists
     def get_top_artists(self):

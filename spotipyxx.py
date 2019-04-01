@@ -6,9 +6,9 @@ import spotipy.util as util
 from json.decoder import JSONDecodeError
 
 
-def get_token():
+def get_token(username):
     #Get username from terminal
-    username = sys.argv[1]
+    #username = sys.argv[1]
 
 
     #try:
