@@ -34,8 +34,9 @@ class ScrapeUserLibrary(object):
                 tracks.append(track['name'])
                 track_uris.append(track['uri'])
             library_df = pd.concat([library_df, pd.DataFrame({'artist': artists, 'artist_uri': artist_uris, 'track': tracks, 'track_uri': track_uris})])
-        library_df = library_df.reset_index()
+        library_df.reset_index(inplace=True)
         library_df['track'] = library_df['track'].str.split(" - ", expand=True)[0]
+        library_df.drop(columns='index', inplace=True)
         return library_df
 
     #return all tracks from all playlists
@@ -68,6 +69,7 @@ class ScrapeUserLibrary(object):
         playlist_df['repeats'] = playlist_df['track_uri'].apply(lambda x: repeats[x])
         playlist_df.drop_duplicates(inplace=True)
         playlist_df.reset_index(inplace=True)
+        playlist_df.drop(columns='index', inplace=True)
         return playlist_df
     
     #return a track's audio features
