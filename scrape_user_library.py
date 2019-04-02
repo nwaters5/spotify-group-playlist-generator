@@ -64,6 +64,8 @@ class ScrapeUserLibrary(object):
                 while tracks['next']:
                     tracks = self.sp.next(tracks)
                     show_tracks(tracks)
+                if len(p_artists) > 500:
+                    break
         playlist_df = pd.DataFrame({'artist': p_artists, 'track': p_tracks, 'track_uri': p_track_uris})
         playlist_df['track'] = playlist_df['track'].str.split(" - ", expand=True)[0]
         repeats = playlist_df['track_uri'].value_counts()
