@@ -82,7 +82,7 @@ class ScrapeUserLibrary(object):
     #return df with new features: dance, energy, valence
     def get_feature_columns(self, df, column_name='track_uri'):
         #sp = spotipy.Spotify(auth=self.token)
-        features = ['danceability', 'energy', 'valence']
+        features = ['danceability', 'energy', 'valence', 'speechiness', 'tempo', 'instrumentalness', 'acousticness', 'mode', 'key']
         for i in features:
             df[i] = df[column_name].apply(lambda x: self.get_audio_features(x, i))
         return df
@@ -100,13 +100,14 @@ class ScrapeUserLibrary(object):
                 artist_uris.append(item['uri'])
             i += 49
             results = self.sp.current_user_top_artists(limit=49, offset=i, time_range="long_term")
-        return pd.DataFrame({'artists': artists, 'artist_uri': artist_uris})
+        artists = pd.DataFrame({'artists': artists, 'artist_uri': artist_uris})
+        return tags.add_features_to_df(artists)
 
     #return top 98 tracks
     def get_top_tracks(self):
         #sp = spotipy.Spotify(auth=self.token)
         tracks = []
-        #track_uris = []
+        track_uris = []
         artists = []
         #artist_uris = []
         results = self.sp.current_user_top_tracks(limit=49, offset=0, time_range="long_term")
@@ -114,12 +115,12 @@ class ScrapeUserLibrary(object):
         while len(results['items']) > 0:
             for item in results['items']:
                 tracks.append(item['name'])
-                #track_uris.append(item['uri'])
+                track_uris.append(item['uri'])
                 artists.append(item['artists'][0]['name'])
                 #artist_uris.append(item['artists'][0]['uri'])
             i +=49
             results = self.sp.current_user_top_tracks(limit=49, offset=i, time_range="long_term")
-        top_artists_df = pd.DataFrame({'artist': artists, 'track': tracks})
+        top_artists_df = pd.DataFrame({'artist': artists, 'track': tracks, 'track_uri': track_uris})
         top_artists_df['track'] = top_artists_df['track'].str.split(" - ", expand=True)[0]
         return tags.add_features_to_df(top_artists_df)
 
