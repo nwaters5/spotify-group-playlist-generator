@@ -1,5 +1,9 @@
 import pandas as pd
 import implicit
+import scipy.sparse as sparse
+from scipy.sparse.linalg import spsolve
+import random
+from sklearn.preprocessing import MinMaxScaler
 
 
 
