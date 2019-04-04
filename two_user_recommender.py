@@ -35,7 +35,7 @@ class TwoUserRecommender(object):
         self.matrix = pd.concat([self.user1_playlist, self.user2_profile, self.user1_profile])
         self.matrix.drop_duplicates(inplace=True)
         self.matrix.set_index('track_uri', drop=True, inplace=True)
-        self.cosine_sim = cosine_similarity(self.matrix.drop(columns=['artist_uri', 'track', 'artist']), self.matrix.drop(columns=['artist_uri', 'track', 'artist']))
+        self.cosine_sim = cosine_similarity(self.matrix.drop(columns=['artist_uri', 'track', 'artist']).fillna(0), self.matrix.drop(columns=['artist_uri', 'track', 'artist']).fillna(0))
         return self
     
     def recommend(self, title):
@@ -48,8 +48,8 @@ class TwoUserRecommender(object):
         for i in range(1, 100):
             j = list(score_series.iloc[i:i+1].index)[0]
             score = list(score_series.iloc[i:i+1])[0]
-            if list(self.matrix.index)[j] not in (list(self.user2_profile['track_uri']) + list(self.user2_library['track_uri'])):
-                if self.matrix.at[list(self.matrix.index)[j], 'artist_uri'] != list(self.user2_profile[self.user2_profile['track_uri'] == title]['artist_uri'])[0]:
+            if list(self.matrix.index)[j] not in (list(self.user2_profile['track_uri']) + list(self.user2_library['track_uri']) + list(self.user2_playlist['track_uri'])):
+                if str(self.matrix.at[list(self.matrix.index)[j], 'artist_uri']) not in list(self.user2_profile[self.user2_profile['track_uri'] == title]['artist_uri']):
                     recommended_songs.update({list(self.matrix.index)[j]: score})
             if len(recommended_songs) > 2:
                 break
@@ -65,7 +65,8 @@ class TwoUserRecommender(object):
         newA = sorted(final_recs, key=final_recs.get, reverse=True)[:20]
         res = list()
         for key in newA:
-            res.append({self.matrix[self.matrix.index == key]['artist'][0]: self.matrix[self.matrix.index == key]['track'][0]})
+            #res.append({list(self.matrix[self.matrix.index == key]['artist'])[0]: list(self.matrix[self.matrix.index == key]['track'])[0]})
+            res.append(key)
         return res
 
         

@@ -132,7 +132,7 @@ class ScrapeUserLibrary(object):
             #df.at[i, 'popularity'] = self.sp.artist(row[column_name])['popularity']
         return df.fillna(0)
 
-    #return top 98 tracks
+    #return top 40 tracks
     def get_top_tracks(self, num=40):
         #sp = spotipy.Spotify(auth=self.token)
         tracks = []
