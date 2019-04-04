@@ -58,9 +58,9 @@ class ScrapeUserLibrary(object):
         p_tracks = []
         p_track_uris = []
         playlists = self.sp.user_playlists(self.user)
-        i = 1
+        #i = 1
         for playlist in playlists['items']:
-            print('getting playlist ' + str(i) + ' of ' + str(len(playlists['items'])))
+            #print('getting playlist ' + str(i) + ' of ' + str(len(playlists['items'])))
             if playlist['owner']['id'] == self.user:
                 results = self.sp.user_playlist(self.user,  playlist['id'],
                             fields="tracks,next")
@@ -71,9 +71,9 @@ class ScrapeUserLibrary(object):
                     show_tracks(tracks)
                 if len(p_artists) > 1000:
                     break
-            i += 1
+            #i += 1
         playlist_df = pd.DataFrame({'artist': p_artists, 'artist_uri': p_artist_uris, 'track': p_tracks, 'track_uri': p_track_uris})
-        print('got all songs from all playlists.')
+        print('got ~1000 songs from playlists.')
         playlist_df['track'] = playlist_df['track'].str.split(" - ", expand=True)[0]
         #repeats = playlist_df['track_uri'].value_counts()
         #playlist_df['repeats'] = playlist_df['track_uri'].apply(lambda x: repeats[x])
@@ -133,13 +133,13 @@ class ScrapeUserLibrary(object):
         return df.fillna(0)
 
     #return top 98 tracks
-    def get_top_tracks(self, num=30):
+    def get_top_tracks(self, num=40):
         #sp = spotipy.Spotify(auth=self.token)
         tracks = []
         track_uris = []
         artists = []
         artist_uris = []
-        results = self.sp.current_user_top_tracks(limit=num, offset=0, time_range="short_term")
+        results = self.sp.current_user_top_tracks(limit=num, offset=0, time_range="medium_term")
         #i = 0
         #while len(results['items']) > 0:
         for item in results['items']:
