@@ -6,10 +6,21 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 class TwoUserRecommender(object):
 
-    def __init__(self, user1, user2):
-        self.user1_playlist, self.user1_profile = get_user_data.get_user_data(user1)
-        self.user2_profile = scrape.ScrapeUserLibrary(user2).get_top_tracks()
-        self.user2_library = scrape.ScrapeUserLibrary(user2).get_library_df()
+    def get_data(self, user1, user2):
+        user1_playlist, user1_library, user1_profile = get_user_data.get_user_data(user1)
+        user2_playlist, user2_library, user2_profile = get_user_data.get_user_data(user2)
+        #self.user2_profile = scrape.ScrapeUserLibrary(user2).get_top_tracks()
+        #self.user2_library = scrape.ScrapeUserLibrary(user2).get_library_df()
+        return user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile
+    
+    def initialize(self, user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile):
+        self.user1_playlist = user1_playlist
+        self.user1_library = user1_library
+        self.user1_profile = user1_profile
+        self.user2_playlist = user2_playlist
+        self.user2_library = user2_library
+        self.user2_profile = user2_profile
+        return self
 
     def fit(self):
         for i in self.user1_playlist.columns:
@@ -18,7 +29,10 @@ class TwoUserRecommender(object):
         for i in self.user2_profile.columns:
             if i not in self.user1_playlist.columns:
                 self.user1_playlist[i] = 0
-        self.matrix = pd.concat([self.user1_playlist, self.user2_profile])
+        for i in self.user1_profile.columns:
+            if i not in self.user2_profile.columns:
+                self.user1_profile[i] = 0
+        self.matrix = pd.concat([self.user1_playlist, self.user2_profile, self.user1_profile])
         self.matrix.drop_duplicates(inplace=True)
         self.matrix.set_index('track_uri', drop=True, inplace=True)
         self.cosine_sim = cosine_similarity(self.matrix.drop(columns=['artist_uri', 'track', 'artist']), self.matrix.drop(columns=['artist_uri', 'track', 'artist']))
@@ -37,7 +51,7 @@ class TwoUserRecommender(object):
             if list(self.matrix.index)[j] not in (list(self.user2_profile['track_uri']) + list(self.user2_library['track_uri'])):
                 if self.matrix.at[list(self.matrix.index)[j], 'artist_uri'] != list(self.user2_profile[self.user2_profile['track_uri'] == title]['artist_uri'])[0]:
                     recommended_songs.update({list(self.matrix.index)[j]: score})
-            if len(recommended_songs) > 3:
+            if len(recommended_songs) > 2:
                 break
         return recommended_songs
 
@@ -48,9 +62,9 @@ class TwoUserRecommender(object):
             d = self.recommend(title)
             final_recs = {**final_recs, **d}
         #newA = dict(sorted(final_recs.iteritems(), key=operator.itemgetter(1), reverse=True)[:15])
-        #newA = sorted(final_recs, key=final_recs.get, reverse=True)[:15]
+        newA = sorted(final_recs, key=final_recs.get, reverse=True)[:20]
         res = list()
-        for key in final_recs:
+        for key in newA:
             res.append({self.matrix[self.matrix.index == key]['artist'][0]: self.matrix[self.matrix.index == key]['track'][0]})
         return res
 

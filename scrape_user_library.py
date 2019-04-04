@@ -69,7 +69,7 @@ class ScrapeUserLibrary(object):
                 while tracks['next']:
                     tracks = self.sp.next(tracks)
                     show_tracks(tracks)
-                if len(p_artists) > 500:
+                if len(p_artists) > 1000:
                     break
             i += 1
         playlist_df = pd.DataFrame({'artist': p_artists, 'artist_uri': p_artist_uris, 'track': p_tracks, 'track_uri': p_track_uris})
@@ -86,21 +86,23 @@ class ScrapeUserLibrary(object):
     
     #return a track's audio features
     #write function that gets all features at once
-    def get_audio_features(self, x, key):
-        return self.sp.audio_features(x)[0][key]
+    def get_audio_features(self, x, features):
+        #features = ['danceability', 'energy', 'valence', 'speechiness', 'tempo', 'instrumentalness', 'acousticness']
+        song_stats = self.sp.audio_features(x)[0]
+        return [song_stats[feature] for feature in features]
     
     #return df with new features: dance, energy, valence
     def get_feature_columns(self, df, column_name='track_uri'):
         print("getting audio features of each song...")
         #sp = spotipy.Spotify(auth=self.token)
         features = ['danceability', 'energy', 'valence', 'speechiness', 'tempo', 'instrumentalness', 'acousticness']
-        for i in features:
-            for j, _ in df.iterrows():
-                try:
-                    df.at[j, i] = self.get_audio_features(df.at[j, column_name], i)
-                except:
-                    continue
-        return df
+        for j, _ in df.iterrows():
+            try:
+                for i, feature in zip(self.get_audio_features(df.at[j, column_name], features), features):
+                    df.at[j, feature] = i
+            except:
+                continue
+        return df.fillna(0)
     
     #return top 98 artists
     def get_top_artists(self):
@@ -131,13 +133,13 @@ class ScrapeUserLibrary(object):
         return df.fillna(0)
 
     #return top 98 tracks
-    def get_top_tracks(self):
+    def get_top_tracks(self, num=30):
         #sp = spotipy.Spotify(auth=self.token)
         tracks = []
         track_uris = []
         artists = []
         artist_uris = []
-        results = self.sp.current_user_top_tracks(limit=30, offset=0, time_range="short_term")
+        results = self.sp.current_user_top_tracks(limit=num, offset=0, time_range="short_term")
         #i = 0
         #while len(results['items']) > 0:
         for item in results['items']:
