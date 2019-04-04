@@ -38,8 +38,9 @@ class ScrapeUserLibrary(object):
         library_df.reset_index(inplace=True)
         library_df['track'] = library_df['track'].str.split(" - ", expand=True)[0]
         library_df.drop(columns='index', inplace=True)
-        library_df = self.get_feature_columns(library_df)
-        return self.get_genres(library_df)
+        return library_df
+        #library_df = self.get_feature_columns(library_df)
+        #return self.get_genres(library_df)
         #return tags.add_features_to_df(library_df)
 
     #return all tracks from all playlists
@@ -57,7 +58,9 @@ class ScrapeUserLibrary(object):
         p_tracks = []
         p_track_uris = []
         playlists = self.sp.user_playlists(self.user)
+        i = 1
         for playlist in playlists['items']:
+            print('getting playlist ' + str(i) + ' of ' + str(len(playlists['items'])))
             if playlist['owner']['id'] == self.user:
                 results = self.sp.user_playlist(self.user,  playlist['id'],
                             fields="tracks,next")
@@ -68,13 +71,15 @@ class ScrapeUserLibrary(object):
                     show_tracks(tracks)
                 if len(p_artists) > 500:
                     break
+            i += 1
         playlist_df = pd.DataFrame({'artist': p_artists, 'artist_uri': p_artist_uris, 'track': p_tracks, 'track_uri': p_track_uris})
+        print('got all songs from all playlists.')
         playlist_df['track'] = playlist_df['track'].str.split(" - ", expand=True)[0]
         #repeats = playlist_df['track_uri'].value_counts()
         #playlist_df['repeats'] = playlist_df['track_uri'].apply(lambda x: repeats[x])
         playlist_df.drop_duplicates(inplace=True)
         playlist_df.reset_index(inplace=True)
-        playlist_df.drop(columns=['index', 'track_uri'], inplace=True)
+        playlist_df.drop(columns=['index',], inplace=True)
         playlist_df = self.get_feature_columns(playlist_df)
         return self.get_genres(playlist_df)
         #return tags.add_features_to_df(playlist_df)
@@ -85,8 +90,9 @@ class ScrapeUserLibrary(object):
     
     #return df with new features: dance, energy, valence
     def get_feature_columns(self, df, column_name='track_uri'):
+        print("getting audio features of each song...")
         #sp = spotipy.Spotify(auth=self.token)
-        features = ['danceability', 'energy', 'valence', 'speechiness', 'tempo', 'instrumentalness', 'acousticness', 'mode', 'key']
+        features = ['danceability', 'energy', 'valence', 'speechiness', 'tempo', 'instrumentalness', 'acousticness']
         for i in features:
             df[i] = df[column_name].apply(lambda x: self.get_audio_features(x, i))
         return df
@@ -112,8 +118,8 @@ class ScrapeUserLibrary(object):
         for i, row in df.iterrows():
             for j in self.sp.artist(row[column_name])['genres']:
                 df.at[i, j] = 1
-            df.at[i, 'popularity'] = self.sp.artist(row[column_name])['popularity']
-        return df
+            #df.at[i, 'popularity'] = self.sp.artist(row[column_name])['popularity']
+        return df.fillna(0)
 
     #return top 98 tracks
     def get_top_tracks(self):
@@ -122,16 +128,16 @@ class ScrapeUserLibrary(object):
         track_uris = []
         artists = []
         artist_uris = []
-        results = self.sp.current_user_top_tracks(limit=49, offset=0, time_range="long_term")
-        i = 0
-        while len(results['items']) > 0:
-            for item in results['items']:
-                tracks.append(item['name'])
-                track_uris.append(item['uri'])
-                artists.append(item['artists'][0]['name'])
-                artist_uris.append(item['artists'][0]['uri'])
-            i +=49
-            results = self.sp.current_user_top_tracks(limit=49, offset=i, time_range="long_term")
+        results = self.sp.current_user_top_tracks(limit=30, offset=0, time_range="short_term")
+        #i = 0
+        #while len(results['items']) > 0:
+        for item in results['items']:
+            tracks.append(item['name'])
+            track_uris.append(item['uri'])
+            artists.append(item['artists'][0]['name'])
+            artist_uris.append(item['artists'][0]['uri'])
+            #i +=49
+            #results = self.sp.current_user_top_tracks(limit=49, offset=i, time_range="long_term")
         top_artists_df = pd.DataFrame({'artist': artists, 'artist_uri': artist_uris, 'track': tracks, 'track_uri': track_uris})
         top_artists_df['track'] = top_artists_df['track'].str.split(" - ", expand=True)[0]
         top_artists_df = self.get_feature_columns(top_artists_df)
