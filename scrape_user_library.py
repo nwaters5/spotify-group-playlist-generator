@@ -34,7 +34,7 @@ class ScrapeUserLibrary(object):
                 artist_uris.append(track['artists'][0]['uri'])
                 tracks.append(track['name'])
                 track_uris.append(track['uri'])
-            library_df = pd.concat([library_df, pd.DataFrame({'artist': artists, 'artist_uri': artist_uris, 'track': tracks, 'track_uri': track_uris})])
+            library_df = pd.concat([library_df, pd.DataFrame({'artist': artists, 'artist_uri': artist_uris, 'track': tracks, 'track_uri': track_uris})], sort=True)
         library_df.reset_index(inplace=True)
         library_df['track'] = library_df['track'].str.split(" - ", expand=True)[0]
         library_df.drop(columns='index', inplace=True)
@@ -133,7 +133,7 @@ class ScrapeUserLibrary(object):
         return df.fillna(0)
 
     #return top 40 tracks
-    def get_top_tracks(self, num=40):
+    def get_top_tracks(self, num=30):
         #sp = spotipy.Spotify(auth=self.token)
         tracks = []
         track_uris = []

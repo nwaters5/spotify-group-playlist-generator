@@ -51,7 +51,7 @@ class TwoUserRecommender(object):
             if list(self.matrix.index)[j] not in (list(self.user2_profile['track_uri']) + list(self.user2_library['track_uri']) + list(self.user2_playlist['track_uri'])):
                 if str(self.matrix.at[list(self.matrix.index)[j], 'artist_uri']) not in list(self.user2_profile[self.user2_profile['track_uri'] == title]['artist_uri']):
                     recommended_songs.update({list(self.matrix.index)[j]: score})
-            if len(recommended_songs) > 2:
+            if len(recommended_songs) > 3:
                 break
         return recommended_songs
 
