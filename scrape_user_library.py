@@ -133,7 +133,7 @@ class ScrapeUserLibrary(object):
         return df.fillna(0)
 
     #return top 40 tracks
-    def get_top_tracks(self, num=30):
+    def get_top_tracks(self, num=45):
         #sp = spotipy.Spotify(auth=self.token)
         tracks = []
         track_uris = []
