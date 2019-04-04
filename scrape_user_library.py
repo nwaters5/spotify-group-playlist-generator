@@ -85,6 +85,7 @@ class ScrapeUserLibrary(object):
         #return tags.add_features_to_df(playlist_df)
     
     #return a track's audio features
+    #write function that gets all features at once
     def get_audio_features(self, x, key):
         return self.sp.audio_features(x)[0][key]
     
@@ -94,7 +95,11 @@ class ScrapeUserLibrary(object):
         #sp = spotipy.Spotify(auth=self.token)
         features = ['danceability', 'energy', 'valence', 'speechiness', 'tempo', 'instrumentalness', 'acousticness']
         for i in features:
-            df[i] = df[column_name].apply(lambda x: self.get_audio_features(x, i))
+            for j, _ in df.iterrows():
+                try:
+                    df.at[j, i] = self.get_audio_features(df.at[j, column_name], i)
+                except:
+                    continue
         return df
     
     #return top 98 artists
@@ -117,8 +122,11 @@ class ScrapeUserLibrary(object):
     def get_genres(self, df, column_name='artist_uri'):
         print("getting genres of each song...")
         for i, row in df.iterrows():
-            for j in self.sp.artist(row[column_name])['genres']:
-                df.at[i, j] = 1
+            try:
+                for j in self.sp.artist(row[column_name])['genres']:
+                    df.at[i, j] = 1
+            except:
+                continue
             #df.at[i, 'popularity'] = self.sp.artist(row[column_name])['popularity']
         return df.fillna(0)
 
