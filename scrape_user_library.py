@@ -115,6 +115,7 @@ class ScrapeUserLibrary(object):
 
 
     def get_genres(self, df, column_name='artist_uri'):
+        print("getting genres of each song...")
         for i, row in df.iterrows():
             for j in self.sp.artist(row[column_name])['genres']:
                 df.at[i, j] = 1
