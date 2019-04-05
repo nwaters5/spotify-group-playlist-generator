@@ -3,6 +3,7 @@ import scrape_user_library as scrape
 import pandas as pd
 import operator
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn import preprocessing
 
 class TwoUserRecommender(object):
 
@@ -32,10 +33,15 @@ class TwoUserRecommender(object):
         for i in self.user1_profile.columns:
             if i not in self.user2_profile.columns:
                 self.user1_profile[i] = 0
-        self.matrix = pd.concat([self.user1_playlist, self.user2_profile, self.user1_profile])
+        self.matrix = pd.concat([self.user1_playlist, self.user2_profile, self.user1_profile], sort=True)
         self.matrix.drop_duplicates(inplace=True)
         self.matrix.set_index('track_uri', drop=True, inplace=True)
-        self.cosine_sim = cosine_similarity(self.matrix.drop(columns=['artist_uri', 'track', 'artist']).fillna(0), self.matrix.drop(columns=['artist_uri', 'track', 'artist']).fillna(0))
+        matrix2 = self.matrix.drop(columns=['artist_uri', 'track', 'artist']).fillna(0)
+        x = matrix2.values 
+        min_max_scaler = preprocessing.MinMaxScaler()
+        x_scaled = min_max_scaler.fit_transform(x)
+        matrix3 = pd.DataFrame(x_scaled)
+        self.cosine_sim = cosine_similarity(matrix3, matrix3)
         return self
     
     def recommend(self, title):
@@ -51,7 +57,7 @@ class TwoUserRecommender(object):
             if list(self.matrix.index)[j] not in (list(self.user2_profile['track_uri']) + list(self.user2_library['track_uri']) + list(self.user2_playlist['track_uri'])):
                 if str(self.matrix.at[list(self.matrix.index)[j], 'artist_uri']) not in list(self.user2_profile[self.user2_profile['track_uri'] == title]['artist_uri']):
                     recommended_songs.update({list(self.matrix.index)[j]: score})
-            if len(recommended_songs) > 3:
+            if len(recommended_songs) > 2:
                 break
         return recommended_songs
 
@@ -62,7 +68,7 @@ class TwoUserRecommender(object):
             d = self.recommend(title)
             final_recs = {**final_recs, **d}
         #newA = dict(sorted(final_recs.iteritems(), key=operator.itemgetter(1), reverse=True)[:15])
-        newA = sorted(final_recs, key=final_recs.get, reverse=True)[:20]
+        newA = sorted(final_recs, key=final_recs.get, reverse=True)[:15]
         res = list()
         for key in newA:
             #res.append({list(self.matrix[self.matrix.index == key]['artist'])[0]: list(self.matrix[self.matrix.index == key]['track'])[0]})
