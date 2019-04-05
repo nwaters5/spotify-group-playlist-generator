@@ -95,7 +95,7 @@ class ScrapeUserLibrary(object):
     def get_feature_columns(self, df, column_name='track_uri'):
         print("getting audio features of each song...")
         #sp = spotipy.Spotify(auth=self.token)
-        features = ['danceability', 'energy', 'valence', 'speechiness', 'tempo', 'instrumentalness', 'acousticness']
+        features = ['danceability', 'energy', 'valence', 'speechiness', 'tempo', 'instrumentalness', 'acousticness', 'liveness']
         for j, _ in df.iterrows():
             try:
                 for i, feature in zip(self.get_audio_features(df.at[j, column_name], features), features):
@@ -129,11 +129,11 @@ class ScrapeUserLibrary(object):
                     df.at[i, j] = 1
             except:
                 continue
-            #df.at[i, 'popularity'] = self.sp.artist(row[column_name])['popularity']
+            df.at[i, 'popularity'] = self.sp.artist(row[column_name])['popularity']
         return df.fillna(0)
 
     #return top 40 tracks
-    def get_top_tracks(self, num=32):
+    def get_top_tracks(self, num=35):
         #sp = spotipy.Spotify(auth=self.token)
         tracks = []
         track_uris = []
