@@ -17,8 +17,8 @@ def create(user1, user2, playlist_name):
     token = spotipyxx.get_token(user1)
     sp = spotipy.Spotify(auth=token)
     sp.user_playlist_create(user1, playlist_name)
-    #playlist_id = sp.user_playlist_create(user=user1, name=playlist_name)['id']
+    playlist_id = str(sp.user_playlist_create(user=user1, name=playlist_name)['id'])
     sp.user_playlist_add_tracks(user=user1, 
-                             playlist_id=sp.user_playlist_create(user=user1, name=playlist_name)['id'], 
+                             playlist_id=playlist_id, 
                              tracks=res)
 

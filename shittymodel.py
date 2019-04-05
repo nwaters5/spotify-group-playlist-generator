@@ -33,8 +33,8 @@ def find_similar_artists(artist_name, n_similar=10):
 
     item_id = list(data1[data1['name'] == artist_name]['new_artist_id'])[0]
     # Get the user and item vectors from our trained model
-    user_vecs = model.user_factors
-    item_vecs = model.item_factors
+    #user_vecs = model.user_factors
+    #item_vecs = model.item_factors
     similar = model.similar_items(item_id, n_similar)
     # Print the names of our most similar artists
     for item in similar:
