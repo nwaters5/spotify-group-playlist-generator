@@ -14,18 +14,18 @@ class TwoUserRecommender(object):
         self.user2_playlist = user2_playlist
         self.user2_library = user2_library
         self.user2_profile = user2_profile
-
+        self.all_users_songs = pd.concat([user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile])
     def fit(self):
-        for i in self.user1_playlist.columns:
-            if i not in self.user2_profile.columns:
-                self.user2_profile[i] = 0
-        for i in self.user2_profile.columns:
-            if i not in self.user1_playlist.columns:
-                self.user1_playlist[i] = 0
-        for i in self.user1_profile.columns:
-            if i not in self.user2_profile.columns:
-                self.user1_profile[i] = 0
-        self.matrix = pd.concat([self.user1_playlist, self.user2_profile, self.user1_profile], sort=True)
+        #for i in self.user1_playlist.columns:
+        #    if i not in self.user2_profile.columns:
+        #        self.user2_profile[i] = 0
+        #for i in self.user2_profile.columns:
+        #    if i not in self.user1_playlist.columns:
+        #        self.user1_playlist[i] = 0
+        #for i in self.user1_profile.columns:
+        #    if i not in self.user2_profile.columns:
+        #       self.user1_profile[i] = 0
+        self.matrix = pd.concat([self.user1_playlist, self.user2_profile, self.user1_profile])
         self.matrix.drop_duplicates(inplace=True)
         self.matrix.set_index('track_uri', drop=True, inplace=True)
         matrix2 = self.matrix.drop(columns=['artist_uri', 'track', 'artist']).fillna(0)
@@ -48,7 +48,7 @@ class TwoUserRecommender(object):
             score = list(score_series.iloc[i:i+1])[0]
             if list(self.matrix.index)[j] not in (list(self.user2_profile['track_uri']) + list(self.user2_library['track_uri']) + list(self.user2_playlist['track_uri'])):
                 if str(self.matrix.at[list(self.matrix.index)[j], 'artist_uri']) not in list(self.user2_profile[self.user2_profile['track_uri'] == title]['artist_uri']):
-                    recommended_songs.update({list(self.matrix.index)[j]: score})
+                    recommended_songs[list(self.matrix.index)[j]] = score
             if len(recommended_songs) > 2:
                 break
         return recommended_songs
@@ -56,17 +56,46 @@ class TwoUserRecommender(object):
 
     def get_recommended_playlist(self):
         final_recs = {}
+        #new_final_recs
         for title in self.user2_profile['track_uri']:
             d = self.recommend(title)
             final_recs = {**final_recs, **d}
-        #newA = dict(sorted(final_recs.iteritems(), key=operator.itemgetter(1), reverse=True)[:15])
+        #for title in self.user2_profile['track_uri']:
+        #    d = self.recommend(title)
+        #    new_final_recs = {**new_final_recs, **d}
+
         newA = sorted(final_recs, key=final_recs.get, reverse=True)[:15]
+        #newB = sorted(final_recs, key=final_recs.get, reverse=True)
         res = list()
+        #new_res = list()
         for key in newA:
             #res.append({list(self.matrix[self.matrix.index == key]['artist'])[0]: list(self.matrix[self.matrix.index == key]['track'])[0]})
             res.append(key)
-        return res
+        #for key in newB:
+        #    new_res.append(key)
+        return res #, new_res
 
+'''       
+    def recommend_new_songs(self, title):
+        new_songs = pd.read_csv()
+        new_songs = pd.concat([new_songs, self.user2_profile]).fillna(0)
+        new_songs.set_index('track_uri', drop=True, inplace=True)
+        cos_sim_new = cosine_similarity(new_songs, new_songs)
+        indices = pd.Series(new_songs.index)
+        recommended_songs = {}
+        idx = indices[indices == title].index[0]
+        score_series = pd.Series(cos_sim_new[idx]).sort_values(ascending = False)
+        for i in range(1, 100):
+            j = list(score_series.iloc[i:i+1].index)[0]
+            score = list(score_series.iloc[i:i+1])[0]
+            if list(new_songs.index)[j] not in (list(self.all_users_songs)):
+                if str(new_songs.at[list(new_songs.index)[j], 'artist_uri']) not in list(self.user2_profile[self.user2_profile['track_uri'] == title]['artist_uri']):
+                    recommended_songs[list(self.matrix.index)[j]] =  score
+            if len(recommended_songs) > 5:
+                break
+        return recommended_songs
+
+'''
         
 
 
