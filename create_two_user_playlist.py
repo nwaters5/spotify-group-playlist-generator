@@ -1,15 +1,20 @@
 import two_user_recommender
+import get_user_data
 from random import shuffle
 import spotipyxx
 import spotipy
-rec = two_user_recommender.TwoUserRecommender()
+
+def get_data(user1, user2):
+    user1_playlist, user1_library, user1_profile = get_user_data.get_user_data(user1)
+    user2_playlist, user2_library, user2_profile = get_user_data.get_user_data(user2)
+    return user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile
 
 def create(user1, user2, playlist_name):
-    user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile = rec.get_data(user1, user2)
-    rec.initialize(user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile)
+    user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile = get_data(user1, user2)
+    rec = two_user_recommender.TwoUserRecommender(user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile)
     rec.fit()
     d1 = rec.get_recommended_playlist()
-    rec.initialize(user2_playlist, user2_library, user2_profile, user1_playlist, user1_library, user1_profile)
+    rec = two_user_recommender.TwoUserRecommender(user2_playlist, user2_library, user2_profile, user1_playlist, user1_library, user1_profile)
     rec.fit()
     d2 = rec.get_recommended_playlist()
     res = d1 + d2

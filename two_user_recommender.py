@@ -6,22 +6,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn import preprocessing
 
 class TwoUserRecommender(object):
-
-    def get_data(self, user1, user2):
-        user1_playlist, user1_library, user1_profile = get_user_data.get_user_data(user1)
-        user2_playlist, user2_library, user2_profile = get_user_data.get_user_data(user2)
-        #self.user2_profile = scrape.ScrapeUserLibrary(user2).get_top_tracks()
-        #self.user2_library = scrape.ScrapeUserLibrary(user2).get_library_df()
-        return user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile
     
-    def initialize(self, user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile):
+    def __init__(self, user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile):
         self.user1_playlist = user1_playlist
         self.user1_library = user1_library
         self.user1_profile = user1_profile
         self.user2_playlist = user2_playlist
         self.user2_library = user2_library
         self.user2_profile = user2_profile
-        return self
 
     def fit(self):
         for i in self.user1_playlist.columns:
