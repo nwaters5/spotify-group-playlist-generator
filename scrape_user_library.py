@@ -133,23 +133,26 @@ class ScrapeUserLibrary(object):
         return df.fillna(0)
 
     #return top 40 tracks
-    def get_top_tracks(self, num=35):
+    def get_top_tracks(self, num=30):
         #sp = spotipy.Spotify(auth=self.token)
         tracks = []
         track_uris = []
         artists = []
         artist_uris = []
-        results = self.sp.current_user_top_tracks(limit=num, offset=0, time_range="medium_term")
-        #i = 0
-        #while len(results['items']) > 0:
-        for item in results['items']:
-            tracks.append(item['name'])
-            track_uris.append(item['uri'])
-            artists.append(item['artists'][0]['name'])
-            artist_uris.append(item['artists'][0]['uri'])
-            #i +=49
-            #results = self.sp.current_user_top_tracks(limit=49, offset=i, time_range="long_term")
+        for term in ['short_term', 'medium_term', 'long_term']:
+            results = self.sp.current_user_top_tracks(limit=num, offset=0, time_range=term)
+            #i = 0
+            #while len(results['items']) > 0:
+            for item in results['items']:
+                tracks.append(item['name'])
+                track_uris.append(item['uri'])
+                artists.append(item['artists'][0]['name'])
+                artist_uris.append(item['artists'][0]['uri'])
+                #i +=49
+                #results = self.sp.current_user_top_tracks(limit=49, offset=i, time_range="long_term")
+
         top_artists_df = pd.DataFrame({'artist': artists, 'artist_uri': artist_uris, 'track': tracks, 'track_uri': track_uris})
+        top_artists_df.drop_duplicates(inplace=True)
         top_artists_df['track'] = top_artists_df['track'].str.split(" - ", expand=True)[0]
         top_artists_df = self.get_feature_columns(top_artists_df)
         return self.get_genres(top_artists_df)
