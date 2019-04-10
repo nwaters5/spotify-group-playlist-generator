@@ -61,7 +61,7 @@ class TwoUserRecommender(object):
             d = self.recommend(title)
             final_recs = {**final_recs, **d}
         #for title in self.user2_profile['track_uri']:
-        #    d = self.recommend(title)
+        #    d = self.recommend_new_songs(title)
         #    new_final_recs = {**new_final_recs, **d}
 
         newA = sorted(final_recs, key=final_recs.get, reverse=True)[:15]
@@ -80,17 +80,18 @@ class TwoUserRecommender(object):
         new_songs = pd.read_csv()
         new_songs = pd.concat([new_songs, self.user2_profile]).fillna(0)
         new_songs.set_index('track_uri', drop=True, inplace=True)
-        cos_sim_new = cosine_similarity(new_songs, new_songs)
-        indices = pd.Series(new_songs.index)
+        new_songs2 = new_songs.drop(columns=['artist_uri', 'track', 'artist']).fillna(0)
+        cos_sim_new = cosine_similarity(new_songs2, new_songs2)
+        indices = pd.Series(new_songs2.index)
         recommended_songs = {}
         idx = indices[indices == title].index[0]
         score_series = pd.Series(cos_sim_new[idx]).sort_values(ascending = False)
         for i in range(1, 100):
             j = list(score_series.iloc[i:i+1].index)[0]
             score = list(score_series.iloc[i:i+1])[0]
-            if list(new_songs.index)[j] not in (list(self.all_users_songs)):
+            if list(new_songs2.index)[j] not in (list(self.all_users_songs['track_uri'])):
                 if str(new_songs.at[list(new_songs.index)[j], 'artist_uri']) not in list(self.user2_profile[self.user2_profile['track_uri'] == title]['artist_uri']):
-                    recommended_songs[list(self.matrix.index)[j]] =  score
+                    recommended_songs[list(new_songs2.index)[j]] =  score
             if len(recommended_songs) > 5:
                 break
         return recommended_songs
