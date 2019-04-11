@@ -4,6 +4,7 @@ import pandas as pd
 import operator
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn import preprocessing
+from sklearn.neighbors import NearestNeighbors
 import pickle
 
 class TwoUserRecommender(object):
@@ -16,7 +17,7 @@ class TwoUserRecommender(object):
         self.user2_library = user2_library
         self.user2_profile = user2_profile
         self.all_users_songs = pd.concat([user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile])
-
+        self.play_prof = pd.concat([user1_playlist, user1_profile, user2_playlist, user2_profile])
 
     def fit(self):
         #for i in self.user1_playlist.columns:
@@ -73,12 +74,23 @@ class TwoUserRecommender(object):
         return res
 
     def recommend_new_songs(self, songs):
-        model = pickle.load(open("model_30n.pkl", 'rb'))
-        df = pd.read_pickle('standardized_cut.pkl')
-        artist_checker = pd.read_pickle('artist_checker.pkl')
+        #model = pickle.load(open("model_30n.pkl", 'rb'))
+        df = pd.read_pickle('unstandardized_with_artists.pkl')
+        self.play_prof.set_index('track_uri', drop=True, inplace=True)
+        entire = self.play_prof.drop(columns=['track', 'artist']).fillna(0)
+        df = pd.concat([df, entire]).fillna(0).drop_duplicates()
+        df.to_pickle('unstandardized_with_artists_updated.pkl')
+        artist_checker = df[['artist_uri']]
+        x = df.values
+        min_max_scaler = preprocessing.MinMaxScaler()
+        x_scaled = min_max_scaler.fit_transform(x)
+        std_df = pd.DataFrame(x_scaled, columns=df.columns, index=df.index)
+        X = std_df.values
+        model = NearestNeighbors(n_neighbors=30).fit(X)
+        #artist_checker = pd.read_pickle('artist_checker.pkl')
         final_recommendations = []
         for song in songs:
-            t = df[df.index == song].values[0]
+            t = std_df[std_df.index == song].values[0]
             l = list(df.iloc[model.kneighbors([t])[1][0]].index)
             recommendations = []
             artists = []
