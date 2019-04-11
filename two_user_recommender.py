@@ -81,6 +81,7 @@ class TwoUserRecommender(object):
         df = pd.concat([df, entire]).fillna(0).drop_duplicates()
         df.to_pickle('unstandardized_with_artists_updated.pkl')
         artist_checker = df[['artist_uri']]
+        df = df.drop(columns='artist_uri')
         x = df.values
         min_max_scaler = preprocessing.MinMaxScaler()
         x_scaled = min_max_scaler.fit_transform(x)
