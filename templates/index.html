@@ -84,9 +84,8 @@
                                 'user_input2': document['user_input2'].value, 
                                 'user_input3': document['user_input3'].value})
               req.send(data)
-          def creating(ev):
               document["creating"].html = "Generating playlist... Takes 5-10 mins"
-          document["predict_button"].bind("click", creating)
+          
           document["predict_button"].bind("click", get_prediction)
         </script>
 
