@@ -4,7 +4,7 @@ import pandas as pd
 import operator
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn import preprocessing
-
+import pickle
 
 class TwoUserRecommender(object):
     
@@ -16,7 +16,6 @@ class TwoUserRecommender(object):
         self.user2_library = user2_library
         self.user2_profile = user2_profile
         self.all_users_songs = pd.concat([user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile])
-        self.new_songs = pd.concat([pd.load_pickle('final_df.pkl'), self.user2_profile]).fillna(0)
 
 
     def fit(self):
@@ -47,12 +46,16 @@ class TwoUserRecommender(object):
         score_series = pd.Series(self.cosine_sim[idx]).sort_values(ascending = False)
         #top_40_indexes = list(score_series.iloc[1:41].index)
         #top_40_scores = list(score_series.iloc[1:41])
+        artists = []
+        title_artist = list(self.user2_profile[self.user2_profile['track_uri'] == title]['artist_uri'])
         for i in range(1, 100):
             j = list(score_series.iloc[i:i+1].index)[0]
             score = list(score_series.iloc[i:i+1])[0]
+            rec_artist = str(self.matrix.at[list(self.matrix.index)[j], 'artist_uri'])
             if list(self.matrix3.index)[j] not in (list(self.user2_profile['track_uri']) + list(self.user2_library['track_uri']) + list(self.user2_playlist['track_uri'])):
-                if str(self.matrix.at[list(self.matrix.index)[j], 'artist_uri']) not in list(self.user2_profile[self.user2_profile['track_uri'] == title]['artist_uri']):
+                if rec_artist not in (title_artist + artists):
                     recommended_songs[list(self.matrix.index)[j]] = score
+                    artists.append(rec_artist)
             if len(recommended_songs) > 2:
                 break
         return recommended_songs
@@ -60,42 +63,33 @@ class TwoUserRecommender(object):
 
     def get_recommended_playlist(self):
         final_recs = {}
-        #new_final_recs
         for title in self.user2_profile['track_uri']:
             d = self.recommend(title)
             final_recs = {**final_recs, **d}
-        #for title in self.user2_profile['track_uri']:
-        #    d = self.recommend_new_songs(title)
-        #    new_final_recs = {**new_final_recs, **d}
-
         newA = sorted(final_recs, key=final_recs.get, reverse=True)[:15]
-        #newB = sorted(final_recs, key=final_recs.get, reverse=True)
         res = list()
-        #new_res = list()
         for key in newA:
-            #res.append({list(self.matrix[self.matrix.index == key]['artist'])[0]: list(self.matrix[self.matrix.index == key]['track'])[0]})
             res.append(key)
-        #for key in newB:
-        #    new_res.append(key)
-        return res #, new_res
+        return res
 
-'''   
-    def recommend_new_songs(self, title):
-        self.new_songs.set_index('track_uri', drop=True, inplace=True)
-        cos_sim_new = cosine_similarity(self.new_songs.drop(columns=['artist_uri', 'track', 'artist']).fillna(0), 
-                                        self.new_songs.drop(columns=['artist_uri', 'track', 'artist']).fillna(0))
-        indices = pd.Series(self.new_songs.index)
-        recommended_songs = {}
-        idx = indices[indices == title].index[0]
-        score_series = pd.Series(cos_sim_new[idx]).sort_values(ascending = False)
-        for i in range(1, 100):
-            j = list(score_series.iloc[i:i+1].index)[0]
-            score = list(score_series.iloc[i:i+1])[0]
-            if list(self.new_songs.index)[j] not in (list(self.all_users_songs['track_uri'])):
-                if str(self.new_songs.at[list(self.new_songs.index)[j], 'artist_uri']) not in list(self.new_songs[self.new_songs['track_uri'] == title]['artist_uri']):
-                    recommended_songs[list(self.new_songs.index)[j]] =  score
-            if len(recommended_songs) > 5:
-                break
-        return recommended_songs
-
-'''  
+    def recommend_new_songs(self, songs):
+        model = pickle.load(open("model_30n.pkl", 'rb'))
+        df = pd.read_pickle('standardized_cut.pkl')
+        artist_checker = pd.read_pickle('artist_checker.pkl')
+        final_recommendations = []
+        for song in songs:
+            t = df[df.index == song].values[0]
+            l = list(df.iloc[model.kneighbors([t])[1][0]].index)
+            recommendations = []
+            artists = []
+            title_artist = str(artist_checker.at[song, 'artist_uri'])
+            for rec in l:
+                if rec not in list(self.all_users_songs['track_uri']):
+                    rec_artist = str(artist_checker.at[rec, 'artist_uri'])
+                    if rec_artist not in artists.append(title_artist):
+                        recommendations.append(rec)
+                        artists.append(rec_artist)
+                if len(recommendations) > 2:
+                    break
+            final_recommendations = final_recommendations + recommendations
+        return final_recommendations
