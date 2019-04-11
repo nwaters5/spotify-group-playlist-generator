@@ -32,12 +32,12 @@ class TwoUserRecommender(object):
         x = matrix2.values 
         min_max_scaler = preprocessing.MinMaxScaler()
         x_scaled = min_max_scaler.fit_transform(x)
-        matrix3 = pd.DataFrame(x_scaled)
-        self.cosine_sim = cosine_similarity(matrix3, matrix3)
+        self.matrix3 = pd.DataFrame(x_scaled)
+        self.cosine_sim = cosine_similarity(self.matrix3, self.matrix3)
         return self
     
     def recommend(self, title):
-        indices = pd.Series(self.matrix.index)
+        indices = pd.Series(self.matrix3.index)
         recommended_songs = {}
         idx = indices[indices == title].index[0]
         score_series = pd.Series(self.cosine_sim[idx]).sort_values(ascending = False)
@@ -46,7 +46,7 @@ class TwoUserRecommender(object):
         for i in range(1, 100):
             j = list(score_series.iloc[i:i+1].index)[0]
             score = list(score_series.iloc[i:i+1])[0]
-            if list(self.matrix.index)[j] not in (list(self.user2_profile['track_uri']) + list(self.user2_library['track_uri']) + list(self.user2_playlist['track_uri'])):
+            if list(self.matrix3.index)[j] not in (list(self.user2_profile['track_uri']) + list(self.user2_library['track_uri']) + list(self.user2_playlist['track_uri'])):
                 if str(self.matrix.at[list(self.matrix.index)[j], 'artist_uri']) not in list(self.user2_profile[self.user2_profile['track_uri'] == title]['artist_uri']):
                     recommended_songs[list(self.matrix.index)[j]] = score
             if len(recommended_songs) > 2:
