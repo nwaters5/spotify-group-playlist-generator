@@ -69,7 +69,7 @@ class ScrapeUserLibrary(object):
                 while tracks['next']:
                     tracks = self.sp.next(tracks)
                     show_tracks(tracks)
-                if len(p_artists) > 1000:
+                if len(p_artists) > 1200:
                     break
             #i += 1
         playlist_df = pd.DataFrame({'artist': p_artists, 'artist_uri': p_artist_uris, 'track': p_tracks, 'track_uri': p_track_uris})
