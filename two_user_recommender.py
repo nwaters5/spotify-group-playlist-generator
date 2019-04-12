@@ -20,15 +20,6 @@ class TwoUserRecommender(object):
         self.play_prof = pd.concat([user1_playlist, user1_profile, user2_playlist, user2_profile], sort=True)
 
     def fit(self):
-        #for i in self.user1_playlist.columns:
-        #    if i not in self.user2_profile.columns:
-        #        self.user2_profile[i] = 0
-        #for i in self.user2_profile.columns:
-        #    if i not in self.user1_playlist.columns:
-        #        self.user1_playlist[i] = 0
-        #for i in self.user1_profile.columns:
-        #    if i not in self.user2_profile.columns:
-        #       self.user1_profile[i] = 0
         self.matrix = pd.concat([self.user1_playlist, self.user2_profile, self.user1_profile], sort=True)
         self.matrix.drop_duplicates(inplace=True)
         self.matrix.set_index('track_uri', drop=True, inplace=True)
@@ -53,7 +44,7 @@ class TwoUserRecommender(object):
             j = list(score_series.iloc[i:i+1].index)[0]
             score = list(score_series.iloc[i:i+1])[0]
             rec_artist = str(self.matrix.at[list(self.matrix.index)[j], 'artist_uri'])
-            if list(self.matrix3.index)[j] not in (list(self.user2_profile['track_uri']) + list(self.user2_library['track_uri']) + list(self.user2_playlist['track_uri'])):
+            if list(self.matrix3.index)[j] not in (list(self.user2_profile['track_uri'])):# + list(self.user2_library['track_uri']) + list(self.user2_playlist['track_uri'])):
                 if rec_artist not in (title_artist + artists):
                     recommended_songs[list(self.matrix.index)[j]] = score
                     artists.append(rec_artist)
@@ -92,7 +83,6 @@ class TwoUserRecommender(object):
         #artist_checker = pd.read_pickle('artist_checker.pkl')
         final_recommendations = []
         for song in songs:
-            print(std_df[std_df.index == song].values)
             t = std_df[std_df.index == song].values[0]
             l = list(df.iloc[model.kneighbors([t])[1][0]].index)
             recommendations = []
@@ -102,7 +92,7 @@ class TwoUserRecommender(object):
             for rec in l:
                 if rec not in list(self.all_users_songs['track_uri']):
                     rec_artist = str(artist_checker.at[rec, 'artist_uri'])
-                    if rec_artist not in artists:
+                    if (rec_artist not in artists and rec not in songs):
                         recommendations.append(rec)
                         artists.append(rec_artist)
                 if len(recommendations) > 2:
