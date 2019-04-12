@@ -16,8 +16,8 @@ class TwoUserRecommender(object):
         self.user2_playlist = user2_playlist
         self.user2_library = user2_library
         self.user2_profile = user2_profile
-        self.all_users_songs = pd.concat([user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile])
-        self.play_prof = pd.concat([user1_playlist, user1_profile, user2_playlist, user2_profile])
+        self.all_users_songs = pd.concat([user1_playlist, user1_library, user1_profile, user2_playlist, user2_library, user2_profile], sort=True)
+        self.play_prof = pd.concat([user1_playlist, user1_profile, user2_playlist, user2_profile], sort=True)
 
     def fit(self):
         #for i in self.user1_playlist.columns:
@@ -29,7 +29,7 @@ class TwoUserRecommender(object):
         #for i in self.user1_profile.columns:
         #    if i not in self.user2_profile.columns:
         #       self.user1_profile[i] = 0
-        self.matrix = pd.concat([self.user1_playlist, self.user2_profile, self.user1_profile])
+        self.matrix = pd.concat([self.user1_playlist, self.user2_profile, self.user1_profile], sort=True)
         self.matrix.drop_duplicates(inplace=True)
         self.matrix.set_index('track_uri', drop=True, inplace=True)
         matrix2 = self.matrix.drop(columns=['artist_uri', 'track', 'artist']).fillna(0)
@@ -96,10 +96,12 @@ class TwoUserRecommender(object):
             recommendations = []
             artists = []
             title_artist = str(artist_checker.at[song, 'artist_uri'])
+            artists.append(title_artist)
             for rec in l:
                 if rec not in list(self.all_users_songs['track_uri']):
                     rec_artist = str(artist_checker.at[rec, 'artist_uri'])
-                    if rec_artist not in artists.append(title_artist):
+                    print(rec_artist)
+                    if rec_artist not in artists:
                         recommendations.append(rec)
                         artists.append(rec_artist)
                 if len(recommendations) > 2:
