@@ -75,13 +75,14 @@ class TwoUserRecommender(object):
 
     def recommend_new_songs(self, songs):
         #model = pickle.load(open("model_30n.pkl", 'rb'))
-        df = pd.read_pickle('unstandardized_with_artists.pkl')
+        df1 = pd.read_pickle('unstandardized_with_artists.pkl')
         self.play_prof.set_index('track_uri', drop=True, inplace=True)
         entire = self.play_prof.drop(columns=['track', 'artist']).fillna(0)
-        df = pd.concat([df, entire]).fillna(0).drop_duplicates()
-        df.to_pickle('unstandardized_with_artists_updated.pkl')
+        df = pd.concat([df1, entire]).fillna(0)
+        #df.to_pickle('unstandardized_with_artists_updated.pkl')
         artist_checker = df[['artist_uri']]
         df = df.drop(columns='artist_uri')
+        df = df[~df.index.duplicated(keep='first')]
         x = df.values
         min_max_scaler = preprocessing.MinMaxScaler()
         x_scaled = min_max_scaler.fit_transform(x)
@@ -91,6 +92,7 @@ class TwoUserRecommender(object):
         #artist_checker = pd.read_pickle('artist_checker.pkl')
         final_recommendations = []
         for song in songs:
+            print(std_df[std_df.index == song].values)
             t = std_df[std_df.index == song].values[0]
             l = list(df.iloc[model.kneighbors([t])[1][0]].index)
             recommendations = []
@@ -100,7 +102,6 @@ class TwoUserRecommender(object):
             for rec in l:
                 if rec not in list(self.all_users_songs['track_uri']):
                     rec_artist = str(artist_checker.at[rec, 'artist_uri'])
-                    print(rec_artist)
                     if rec_artist not in artists:
                         recommendations.append(rec)
                         artists.append(rec_artist)
