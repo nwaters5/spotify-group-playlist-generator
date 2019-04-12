@@ -53,7 +53,7 @@ class TwoUserRecommender(object):
             j = list(score_series.iloc[i:i+1].index)[0]
             score = list(score_series.iloc[i:i+1])[0]
             rec_artist = str(self.matrix.at[list(self.matrix.index)[j], 'artist_uri'])
-            if list(self.matrix3.index)[j] not in (list(self.user2_profile['track_uri'])): #+ list(self.user2_library['track_uri']) + list(self.user2_playlist['track_uri'])):
+            if list(self.matrix3.index)[j] not in (list(self.user2_profile['track_uri']) + list(self.user2_library['track_uri']) + list(self.user2_playlist['track_uri'])):
                 if rec_artist not in (title_artist + artists):
                     recommended_songs[list(self.matrix.index)[j]] = score
                     artists.append(rec_artist)

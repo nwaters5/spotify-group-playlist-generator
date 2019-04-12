@@ -24,7 +24,7 @@ def create(user1, user2, playlist_name):
     rec = two_user_recommender.TwoUserRecommender(user2_playlist, user2_library, user2_profile, user1_playlist, user1_library, user1_profile)
     rec.fit()
     d2 = rec.get_recommended_playlist()
-    res = list(set(d1 + d2))
+    res = d1 + d2
     shuffle(res)
     new = rec.recommend_new_songs(res)
     shuffle(new)
