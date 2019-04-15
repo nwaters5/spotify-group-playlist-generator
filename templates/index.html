@@ -54,7 +54,8 @@
     <div class="row">
       <div class="col-lg-12 text-center">
         <h1 class="mt-5">Spotify Two Person Playlist Generator</h1>
-        <div>This app creates a playlist catered to the overlapping tastes of two users</div>
+        <div>Using the power of data science, this app creates a playlist catered to the overlapping tastes of two users
+        </div>
         <p class="lead"></p>
 
         <script type="text/python3">
@@ -64,16 +65,17 @@
           def show_results(response):
               if response.status==200 or response.status==0:
                   data = json.loads(response.text)
-                  #spam = 'Spam' if data['pred'] is True else 'Not Spam'
-                  #divs = ["result", "result2", "result3", "result4", 
-                  #"result5", "result6", "result7", "result8", "result9", "result10"]
-                  #for i in range(len(data['pred'])):
                   document["result"].html = "Done! Your new playlist has been created."
-                  #document["result"].html = '\n'.join(data['pred'])
-                  #document["result"].html = 'Probability is: ' + str(data['prob'])
+                
               else:
                   warnings.warn(response.text)
-
+          def authorized(response):
+              if response.status==200 or response.status==0:
+                document["authorized"].html = "Authorized!"
+              
+              else:
+                warnings.warn(response.text)
+          
           def get_prediction(ev):
               """Get the predicted probability."""
               req = ajax.ajax()
@@ -86,11 +88,34 @@
               req.send(data)
               document["creating"].html = "Generating playlist... sit tight"
           
-          document["predict_button"].bind("click", get_prediction)
-        </script>
+          
+          
+          
+          
+          '''
+              def get_username(ev):
+              req = ajax.ajax()
+              req.bind('complete', authorized)
+              req.open('POST', '/redir', True)
+              req.set_header('Access-Control-Allow-Origin','application/json')
+              #data = json.dumps({'username': document['user_input'].value, 
+              #                  'user_input2': document['user_input2'].value, 
+              #                  'user_input3': document['user_input3'].value})
+              req.send()
+          '''
 
+          document["predict_button"].bind("click", get_prediction)
+          #document["auth1_button"].bind("click", get_username)
+          
+        </script>
+        <a href='http://127.0.0.1:8081/auth'>
+          <button id="auth1_button">Authorize (if first time)</button>
+        </a>
+        <div id="authorized"></div>
         <textarea id="user_input" placeholder="Enter Spotify username" rows=1 cols=50></textarea>
+
         <textarea id="user_input2" placeholder="Enter another Spotify username" rows=1 cols=50></textarea>
+
         <textarea id="user_input3" placeholder="Enter playlist name" rows=1 cols=50></textarea>
         <p></p>
         <button id="predict_button">Generate!</button>
