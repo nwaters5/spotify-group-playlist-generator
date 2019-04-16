@@ -42,6 +42,7 @@ auth_query_parameters = {
 }
 
 
+
 @app.route('/')
 def index():
     """Return the main page."""
@@ -53,7 +54,7 @@ def index():
 def auth():
     url_args = "&".join(["{}={}".format(key, quote(val)) for key, val in auth_query_parameters.items()])
     auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
-    get_token('3z9j4o0pa8xlbipzbhgz9om44')
+    #get_token('3z9j4o0pa8xlbipzbhgz9om44')
     #return get_token('nwaters5')
     return redirect(auth_url, code=307)
 
@@ -62,8 +63,10 @@ def auth():
 @app.route("/callback/q")
 def callback():
     # Auth Step 4: Requests refresh and access tokens
+    
+
     auth_token = request.args['code']
-    print("http://127.0.0.1:8081/callback/q?code=" + auth_token)
+    #print("http://127.0.0.1:8081/callback/q?code=" + auth_token)
     code_payload = {
         "grant_type": "authorization_code",
         "code": str(auth_token),
@@ -74,8 +77,20 @@ def callback():
     post_request = requests.post(SPOTIFY_TOKEN_URL, data=code_payload)
     # Auth Step 5: Tokens are Returned to Application
     response_data = json.loads(post_request.text)
-    access_token = response_data["access_token"]
-    
+    with open('status.txt', 'r') as s:
+        stat = s.read()
+    print(stat)
+    if stat == '1':
+        with open('status.txt', 'w') as status:
+            status.write('0')
+        with open('token2.txt', 'w') as text:
+            text.write(response_data["access_token"])
+    else:
+        with open('status.txt', 'w') as status:
+            status.write('1')
+        with open('token1.txt', 'w') as text:
+            text.write(response_data["access_token"])
+    '''
     refresh_token = response_data["refresh_token"]
     token_type = response_data["token_type"]
     expires_in = response_data["expires_in"]
@@ -85,14 +100,19 @@ def callback():
     user_profile_api_endpoint = "{}/me".format(SPOTIFY_API_URL)
     profile_response = requests.get(user_profile_api_endpoint, headers=authorization_header)
     profile_data = json.loads(profile_response.text)
+    '''
     return redirect("http://127.0.0.1:8081/")
 
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
     """Return a random prediction."""
+    with open("token1.txt", "r") as x:
+        tok1 = x.read()
+    with open('token2.txt', 'r') as y:
+        tok2 = y.read()
     print("creating...")
     data = request.json
-    create_two_user_playlist.create(user1=data['user_input'], user2=data['user_input2'], playlist_name=data['user_input3'])
+    create_two_user_playlist.create(token1=tok1, token2=tok2, playlist_name=data['user_input3'])
     return jsonify({'pred': 'Done!'})
     # return jsonify({'prob': 100 * round(prediction[0][1], 1)})
 

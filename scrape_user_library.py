@@ -10,10 +10,10 @@ import add_lastfm_tags as tags
 class ScrapeUserLibrary(object):
     
     #initialize tokens
-    def __init__(self, username):
-        token = spotipyxx.get_token(username)
+    def __init__(self, token):
+        #token = spotipyxx.get_token(username)
         self.sp = spotipy.Spotify(auth=token)
-        self.user = username
+        self.user = self.sp.current_user()['id']
     
     #return all saved tracks
     def get_library_df(self):
@@ -153,7 +153,7 @@ class ScrapeUserLibrary(object):
 
         top_artists_df = pd.DataFrame({'artist': artists, 'artist_uri': artist_uris, 'track': tracks, 'track_uri': track_uris})
         top_artists_df.drop_duplicates(inplace=True)
-        top_artists_df['track'] = top_artists_df['track'].str.split(" - ", expand=True)[0]
+        #top_artists_df['track'] = top_artists_df['track'].str.split(" - ", expand=True)[0]
         top_artists_df = self.get_feature_columns(top_artists_df)
         return self.get_genres(top_artists_df)
         #return tags.add_features_to_df(top_artists_df)
