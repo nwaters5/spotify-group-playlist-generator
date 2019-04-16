@@ -73,19 +73,16 @@ def callback():
     # Auth Step 5: Tokens are Returned to Application
     response_data = json.loads(post_request.text)
     access_token = response_data["access_token"]
-    print(access_token)
-    sp = spotipy.Spotify(auth=access_token)
-    print(sp.current_user_saved_tracks(limit=10, offset=0))
-    #refresh_token = response_data["refresh_token"]
-    #token_type = response_data["token_type"]
-    #expires_in = response_data["expires_in"]
+    
+    refresh_token = response_data["refresh_token"]
+    token_type = response_data["token_type"]
+    expires_in = response_data["expires_in"]
 
     # Auth Step 6: Use the access token to access Spotify API
-    #authorization_header = {"Authorization": "Bearer {}".format(access_token)}
-    #user_profile_api_endpoint = "{}/me".format(SPOTIFY_API_URL)
-    #profile_response = requests.get(user_profile_api_endpoint, headers=authorization_header)
-    #profile_data = json.loads(profile_response.text)
-    #print(profile_data)
+    authorization_header = {"Authorization": "Bearer {}".format(access_token)}
+    user_profile_api_endpoint = "{}/me".format(SPOTIFY_API_URL)
+    profile_response = requests.get(user_profile_api_endpoint, headers=authorization_header)
+    profile_data = json.loads(profile_response.text)
     return redirect("http://127.0.0.1:8081")
 
 @app.route('/predict', methods=['GET', 'POST'])
