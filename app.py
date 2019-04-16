@@ -13,8 +13,8 @@ app = Flask(__name__, static_url_path="")
 
 
 #  Client Keys
-CLIENT_ID = "2e84b0cb7caf47e4bccae6ce7a96a1ef"
-CLIENT_SECRET = "9cecb2892469433db84733dc4a3258a5"
+CLIENT_ID = "d661ec65f4de458a95e1acb3e8b2b09d"
+CLIENT_SECRET = "1988ade7ae9c46de99b2060e571666fb"
 
 # Spotify URLS
 SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -53,7 +53,8 @@ def index():
 def auth():
     url_args = "&".join(["{}={}".format(key, quote(val)) for key, val in auth_query_parameters.items()])
     auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
-    print(auth_url)
+    get_token('3z9j4o0pa8xlbipzbhgz9om44')
+    #return get_token('nwaters5')
     return redirect(auth_url, code=307)
 
 
@@ -62,6 +63,7 @@ def auth():
 def callback():
     # Auth Step 4: Requests refresh and access tokens
     auth_token = request.args['code']
+    print("http://127.0.0.1:8081/callback/q?code=" + auth_token)
     code_payload = {
         "grant_type": "authorization_code",
         "code": str(auth_token),
@@ -83,7 +85,7 @@ def callback():
     user_profile_api_endpoint = "{}/me".format(SPOTIFY_API_URL)
     profile_response = requests.get(user_profile_api_endpoint, headers=authorization_header)
     profile_data = json.loads(profile_response.text)
-    return redirect("http://127.0.0.1:8081")
+    return redirect("http://127.0.0.1:8081/")
 
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
