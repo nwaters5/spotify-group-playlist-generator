@@ -8,7 +8,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Spotify Two Person Playlist Generator</title>
+  <title>Overlap: Two Person Playlist Generator</title>
   <script type="text/javascript" src="brython.js"></script>
   <script type="text/javascript" src="brython_stdlib.js"></script>
 
@@ -23,7 +23,7 @@
   <!-- Navigation -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
     <div class="container">
-      <a class="navbar-brand" href="#">Overlap: Playlist Generator</a>
+      <a class="navbar-brand" href="#">Overlap: Two Person Playlist Generator</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
         aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -53,22 +53,22 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-12 text-center">
-        <h1 class="mt-5">Spotify Two Person Playlist Generator</h1>
+        <h1 class="mt-5">Overlap</h1>
         <div>
           <p>With the power of machine learning, this app creates a playlist catered to the overlapping tastes of two
             users
           </p>
         </div>
-        <div style="color:blue;" style="float: left;">
-          <small>
-            <p>Instructions:
-              <br>1. Click "Authorize!" and authorize your Spotify account.
-              <br>(The currently logged in user will be authorized)
-              <br>2. Go to spotify.com and LOG OUT of your Spotify account (and Facebook if connected).
-              <br>3. Click "Authorize!" again and authorize your friend's Spotify account.
-              <br>4. Check under "Users on deck". You should see you and your friend's account names.
-              <br>5. Enter a playlist name and click "Generate!"</p>
-          </small>
+        <div style="float: center;">
+          <small><small>
+              <p style="color:blue" align='left'>Instructions:
+                <br>1. Click "Authorize!" and authorize your Spotify account.
+                <br>(The currently logged in user will be authorized)
+                <br>2. Go to spotify.com and LOG OUT of your Spotify account (and Facebook if connected).
+                <br>3. Click "Authorize!" again and authorize your friend's Spotify account.
+                <br>4. Check under "Users on deck". You should see you and your friend's account names.
+                <br>5. Enter a playlist name and click "Generate!"</p>
+            </small></small>
 
         </div>
         <p class="lead"></p>
@@ -133,6 +133,7 @@
           document["predict_button"].bind("click", get_prediction)
           get_users()
         </script>
+
         <a href='http://127.0.0.1:8081/auth'>
           <button id="auth1_button">Authorize!</button>
         </a>
@@ -151,6 +152,7 @@
         <p></p>
         <div id="creating"></div>
         <div id="result"></div>
+
 
 
         <ul class="list-unstyled">
