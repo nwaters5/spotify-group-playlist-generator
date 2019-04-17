@@ -14,7 +14,7 @@ network = pylast.LastFMNetwork(
 def get_tags(artist, song):
     track = network.get_track(artist, song)
     topItems = track.get_top_tags(limit=8)
-    d = []
+    d = {}
     for topItem in topItems:
         if "".join((str(topItem.item.get_name()).lower()).split()) != "".join(
             (str(artist).lower()).split()
@@ -22,13 +22,12 @@ def get_tags(artist, song):
             item_clean = "".join(
                 topItem.item.get_name().lower().replace("-", "").split()
             )
-            d.append(topItem.item.get_name().lower())
+            d.update({item_clean: topItem.weight})
     return d
 
 
 # adds the top tags to dataframe
 def add_features_to_df(df):
-    df["lastfm"] = 0
     for i, row in df.iterrows():
         try:
             d = get_tags(row["artist"], row["track"])
