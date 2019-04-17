@@ -61,10 +61,11 @@
         <div style="color:red;" style="float: left;">
           <small>
             <p>Instructions:
-              <br>1. Click "Authorize!" and authorize your Spotify account
-              <br>2. LOG OUT of your Spotify account (and Facebook if it's linked)
-              <br>3. Click "Authorize!" again and authorize your friend's Spotify account
-              <br>4. Enter a playlist name and click "Generate!"</p>
+              <br>1. Click "Authorize!" and authorize your Spotify account.
+              <br>2. Go to spotify.com and LOG OUT of your Spotify account.
+              <br>3. Click "Authorize!" again and authorize your friend's Spotify account.
+              <br>4. Check under "Users on deck". You should see you and your friend's account names.
+              <br>5. Enter a playlist name and click "Generate!"</p>
           </small>
 
         </div>
@@ -93,7 +94,7 @@
               req.set_header('content-type','application/json')
               data = json.dumps({'user_input3': document['user_input3'].value})
               req.send(data)
-              document["creating"].html = "Generating playlist... sit tight"
+              document["creating"].html = "Generating playlist... sit tight. Takes ~10 mins."
 
           
           
@@ -133,6 +134,7 @@
         <a href='http://127.0.0.1:8081/auth'>
           <button id="auth1_button">Authorize!</button>
         </a>
+        <p></p>
         <div id="authorized"></div>
         <div id="authorized1"></div>
         <div id="authorized2"></div>
