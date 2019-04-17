@@ -43,6 +43,13 @@ auth_query_parameters = {
 }
 
 
+@app.route("/home")
+def home():
+    with open("templates/user_info/status.txt", "w") as status:
+        status.write("0")
+    return render_template("index.html")
+
+
 @app.route("/")
 def index():
     """Return the main page."""
