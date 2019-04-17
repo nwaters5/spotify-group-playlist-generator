@@ -1,8 +1,5 @@
-import pickle
-
-# import spotify_requests
 import pandas as pd
-from flask import Flask, request, render_template, jsonify, redirect, g, session
+from flask import Flask, request, render_template, jsonify, redirect, g
 import create_two_user_playlist
 import json
 import requests
@@ -13,18 +10,18 @@ import config2
 app = Flask(__name__, static_url_path="")
 
 
-#  Client Keys
+# client keys
 CLIENT_ID = config2.client_id
 CLIENT_SECRET = config2.client_secret
 
-# Spotify URLS
+# spotify URLS
 SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_API_BASE_URL = "https://api.spotify.com"
 API_VERSION = "v1"
 SPOTIFY_API_URL = "{}/{}".format(SPOTIFY_API_BASE_URL, API_VERSION)
 
-# Server-side Parameters
+# server-side parameters
 CLIENT_SIDE_URL = "http://127.0.0.1"
 PORT = 8081
 REDIRECT_URI = "{}:{}/callback/q".format(CLIENT_SIDE_URL, PORT)
@@ -37,22 +34,20 @@ auth_query_parameters = {
     "response_type": "code",
     "redirect_uri": REDIRECT_URI,
     "scope": SCOPE,
-    # "state": STATE,
-    # "show_dialog": SHOW_DIALOG_str,
     "client_id": CLIENT_ID,
 }
 
 
 @app.route("/home")
 def home():
-    with open("templates/user_info/status.txt", "w") as status:
-        status.write("0")
     return render_template("index.html")
 
 
 @app.route("/")
 def index():
     """Return the main page."""
+    with open("templates/user_info/status.txt", "w") as status:
+        status.write("0")
     return render_template("index.html")
 
 
@@ -62,17 +57,13 @@ def auth():
         ["{}={}".format(key, quote(val)) for key, val in auth_query_parameters.items()]
     )
     auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
-    # get_token('3z9j4o0pa8xlbipzbhgz9om44')
-    # return get_token('nwaters5')
     return redirect(auth_url, code=307)
 
 
 @app.route("/callback/q")
 def callback():
-    # Auth Step 4: Requests refresh and access tokens
-
+    # requests refresh and access tokens
     auth_token = request.args["code"]
-    # print("http://127.0.0.1:8081/callback/q?code=" + auth_token)
     code_payload = {
         "grant_type": "authorization_code",
         "code": str(auth_token),
@@ -81,10 +72,11 @@ def callback():
         "client_secret": CLIENT_SECRET,
     }
     post_request = requests.post(SPOTIFY_TOKEN_URL, data=code_payload)
-    # Auth Step 5: Tokens are Returned to Application
+    # tokens are returned to application
     response_data = json.loads(post_request.text)
     sp = spotipy.Spotify(auth=response_data["access_token"])
     display_name = sp.current_user()["display_name"]
+    # prepare tokens and "Users on deck"
     with open("templates/user_info/status.txt", "r") as s:
         stat = s.read()
     if stat == "1":
@@ -116,9 +108,10 @@ def callback():
         with open("templates/user_info/user1.txt", "w") as user:
             user.write(display_name)
 
-    return redirect("http://127.0.0.1:8081/")
+    return redirect("http://127.0.0.1:8081/home")
 
 
+# get usernames for "Users on deck"
 @app.route("/get_users", methods=["GET", "POST"])
 def get_users():
     with open("templates/user_info/user2.txt", "r") as user:
@@ -130,6 +123,7 @@ def get_users():
     return jsonify({"user1": user1, "user2": user2, "status": stat})
 
 
+# run the recommender
 @app.route("/predict", methods=["GET", "POST"])
 def predict():
     """Return a random prediction."""
@@ -146,13 +140,7 @@ def predict():
     with open("templates/user_info/status.txt", "w") as status:
         status.write("0")
     return jsonify({"pred": "Done!"})
-    # return jsonify({'prob': 100 * round(prediction[0][1], 1)})
 
 
-# import random
-# import pandas as pd
-# from sklearn.feature_extraction.text import TfidfVectorizer
-# from sklearn.naive_bayes import MultinomialNB
-# from sklearn.pipeline import Pipeline
 if __name__ == "__main__":
     app.run(debug=True, port=PORT)
